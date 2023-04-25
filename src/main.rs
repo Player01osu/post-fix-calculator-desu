@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, str::FromStr, io::stdin};
+use std::{collections::VecDeque, str::FromStr, io::{stdin, stdout}};
 
 #[derive(Debug)]
 pub enum Operator {
@@ -13,12 +13,12 @@ pub enum CalcToken {
 }
 
 impl FromStr for CalcToken {
-    type Err = ();
+    type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.trim() {
             "+" => Ok(CalcToken::Operator(Operator::Plus)),
             "*" => Ok(CalcToken::Operator(Operator::Multiply)),
-            s => Ok(CalcToken::Literal(s.parse().unwrap())),
+            s => Ok(CalcToken::Literal(s.parse::<i32>().map_err(|e| e.to_string())?)),
         }
     }
 }
@@ -51,11 +51,22 @@ pub fn process_stack(mut stack: CalcStack) {
     }
 }
 
+use std::io::Write;
+
 fn main() {
     let mut queue = VecDeque::<CalcToken>::new();
+    let mut stdout = stdout();
 
+    print!("calc-desu> ");
+    stdout.flush().unwrap();
     for lines in stdin().lines().filter_map(|l| l.ok()).filter(|l| !l.is_empty()) {
-        queue.push_back(lines.parse().unwrap());
+        match lines.parse() {
+            Ok(token) => queue.push_back(token),
+            Err(e) => println!("{e}"),
+        }
+
+        print!("calc-desu> ");
+        stdout.flush().unwrap();
     }
 
     process_stack(queue);
