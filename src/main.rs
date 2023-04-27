@@ -10,6 +10,8 @@ pub enum Operator {
 pub enum CalcToken {
     Literal(i32),
     Operator(Operator),
+    // End of expression
+    EOE
 }
 
 impl FromStr for CalcToken {
@@ -18,6 +20,7 @@ impl FromStr for CalcToken {
         match s.trim() {
             "+" => Ok(CalcToken::Operator(Operator::Plus)),
             "*" => Ok(CalcToken::Operator(Operator::Multiply)),
+            "=" => Ok(CalcToken::EOE),
             s => Ok(CalcToken::Literal(s.parse::<i32>().map_err(|e| e.to_string())?)),
         }
     }
@@ -42,10 +45,10 @@ pub fn process_operator(stack: &mut CalcStack, operator: Operator) {
     println!("{acc}");
 }
 
-pub fn process_stack(mut stack: CalcStack) {
+pub fn process_stack(stack: &mut CalcStack) {
     while let Some(token) = stack.pop_front() {
         match token {
-            CalcToken::Operator(operator) => process_operator(&mut stack, operator),
+            CalcToken::Operator(operator) => process_operator(stack, operator),
             k => panic!("Expected an operator, got {k:?}"),
         }
     }
@@ -61,7 +64,14 @@ fn main() {
     stdout.flush().unwrap();
     for lines in stdin().lines().filter_map(|l| l.ok()).filter(|l| !l.is_empty()) {
         match lines.parse() {
-            Ok(token) => queue.push_back(token),
+            Ok(token) => {
+                match token {
+                    CalcToken::EOE => {
+                        process_stack(&mut queue);
+                    }
+                    _ => queue.push_back(token)
+                }
+            }
             Err(e) => println!("{e}"),
         }
 
@@ -69,5 +79,5 @@ fn main() {
         stdout.flush().unwrap();
     }
 
-    process_stack(queue);
+    process_stack(&mut queue);
 }
