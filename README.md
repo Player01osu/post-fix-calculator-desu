@@ -14,20 +14,25 @@ $ cargo r --release
 ### Supported operators
 
 ```
-'+' => Addition
-'*' => Multiplication
+'+' => Addition (pop 2, push their sum)
+'-' => Subtraction (pop 2, push their difference)
+'*' => Multiplication (pop 2, push their multiple)
+'/' => Divition (pop 2, push their division)
 ```
+
+##### Note: Division divides penultimate elem by top elem
 
 ### Example:
 
 ```console
 $ cargo r --release
 
-calc-desu> *
 calc-desu> 10
 calc-desu> 2
 calc-desu> 3
-EOF (ctrl + d)
+calc-desu> *
+calc-desu> *
+calc-desu> p
 60
 ```
 
